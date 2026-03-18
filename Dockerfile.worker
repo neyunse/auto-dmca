@@ -1,0 +1,31 @@
+# Build phase
+FROM node:18-alpine AS builder
+
+WORKDIR /app
+
+# Copy root and workspace manifests
+COPY package.json package-lock.json ./
+COPY apps/dashboard/package.json ./apps/dashboard/
+COPY apps/worker/package.json ./apps/worker/
+COPY packages/database/package.json ./packages/database/
+
+# Install only production dependencies
+RUN npm ci --omit=dev
+
+# Copy the rest of the source code
+COPY . .
+
+# Final Runner phase
+FROM node:18-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV PORT=4000
+
+# Copy node_modules and built/source code from builder
+COPY --from=builder /app ./
+
+EXPOSE 4000
+
+# Start the worker
+CMD ["npm", "start", "--workspace=apps/worker"]
