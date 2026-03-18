@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/components/AuthProvider";
 
 const navItems = [
   { name: "Command Center", icon: "💎", path: "/" },
@@ -11,6 +12,7 @@ const navItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { user, logout } = useAuth();
 
   return (
     <aside className="w-72 bg-black/80 backdrop-blur-xl border-r border-white/10 flex flex-col h-screen fixed left-0 top-0 z-40">
@@ -50,23 +52,32 @@ export default function Sidebar() {
         })}
       </nav>
 
-      <div className="p-8 border-t border-white/5">
+      <div className="p-8 space-y-4">
         <div className="glass-panel p-5 rounded-2xl border border-white/5">
           <div className="flex items-center gap-4">
             <div className="relative">
               <div className="w-10 h-10 rounded-full border-2 border-white/10 bg-gradient-to-tr from-white/5 to-white/20 p-1">
-                 <div className="w-full h-full rounded-full bg-white flex items-center justify-center text-black font-black text-xs italic">A</div>
+                 <div className="w-full h-full rounded-full bg-white flex items-center justify-center text-black font-black text-xs italic">
+                   {user?.username?.charAt(0).toUpperCase() || 'A'}
+                 </div>
               </div>
               <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-green-500 border-2 border-black flex items-center justify-center">
                  <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></div>
               </div>
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-white">Administrator</p>
-              <p className="text-[9px] font-mono text-white/30 uppercase">Level 4 Access</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-white truncate max-w-[120px]">{user?.username || 'Administrator'}</p>
+              <p className="text-[9px] font-mono text-white/30 uppercase">{user?.role || 'Level 4'} Access</p>
             </div>
           </div>
         </div>
+
+        <button 
+          onClick={logout}
+          className="w-full p-4 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] text-white/30 hover:text-red-500 hover:border-red-500/50 hover:bg-red-500/5 transition-all text-center"
+        >
+          Terminate Session
+        </button>
       </div>
     </aside>
   );

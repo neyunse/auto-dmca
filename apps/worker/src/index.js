@@ -1,6 +1,6 @@
-import { Server } from 'socket.io';
-import { createServer } from 'http';
-import { connectDB, Alert, Target, Config, Exclusion } from 'database';
+import { connectDB, Alert, Target, Config, Exclusion, User } from 'database';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 // ... (lines 4-79 unchanged conceptually, but we replace the block)
 
 import dotenv from 'dotenv';
@@ -137,6 +137,54 @@ const scheduleScraper = async () => {
 
 io.on('connection', (socket) => {
   console.log('Client connected to dashboard: ' + socket.id);
+
+  socket.on('check-registration-status', async (callback) => {
+    try {
+      const count = await User.countDocuments();
+      if (callback) callback({ registered: count > 0 });
+    } catch (e) {
+      if (callback) callback({ error: e.message });
+    }
+  });
+
+  socket.on('register', async (data, callback) => {
+    try {
+      const count = await User.countDocuments();
+      if (count > 0) {
+        return callback({ error: 'Registration is locked. Admin already exists.' });
+      }
+      
+      const { username, password } = data;
+      const newUser = await User.create({ username, password });
+      
+      console.log(`[Auth] Admin registered: ${username}`);
+      if (callback) callback({ success: true });
+    } catch (e) {
+      if (callback) callback({ error: e.message });
+    }
+  });
+
+  socket.on('login', async (data, callback) => {
+    try {
+      const { username, password } = data;
+      const user = await User.findOne({ username });
+      
+      if (!user || !(await user.comparePassword(password))) {
+        return callback({ error: 'Invalid credentials' });
+      }
+
+      const token = jwt.sign(
+        { id: user._id, username: user.username, role: user.role },
+        process.env.JWT_SECRET || 'fallback-secret-kagarisoft',
+        { expiresIn: '7d' }
+      );
+
+      console.log(`[Auth] User logged in: ${username}`);
+      if (callback) callback({ token, user: { username: user.username, role: user.role } });
+    } catch (e) {
+      if (callback) callback({ error: e.message });
+    }
+  });
   
   socket.on('manual-scan', async (callback) => {
     console.log('[System] Manual scan requested via dashboard.');

@@ -3,6 +3,7 @@ import { Alert } from './models/Alert.js';
 import { Target } from './models/Target.js';
 import { Config } from './models/Config.js';
 import { Exclusion } from './models/Exclusion.js';
+import { User } from './models/User.js';
 
 export const connectDB = async (uri) => {
   try {
@@ -18,4 +19,4 @@ export const connectDB = async (uri) => {
   }
 };
 
-export { Alert, Target, Config, Exclusion };
+export { Alert, Target, Config, Exclusion, User };

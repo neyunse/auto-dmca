@@ -3,11 +3,11 @@ version: '3.8'
 services:
   # Node.js Worker & Sockets
   worker:
-    build:
-      context: .
-      dockerfile: Dockerfile.worker
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER:-neyunse}/dmca-worker:latest
     environment:
       - MONGODB_URI=${MONGODB_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - SERPAPI_KEY=${SERPAPI_KEY}
       - PORT=4000
     ports:
       - "4000:4000"
@@ -15,11 +15,10 @@ services:
 
   # Next.js Dashboard
   dashboard:
-    build:
-      context: .
-      dockerfile: Dockerfile.dashboard
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER:-neyunse}/dmca-dashboard:latest
     environment:
       - MONGODB_URI=${MONGODB_URI}
+      - JWT_SECRET=${JWT_SECRET}
       - NEXT_PUBLIC_SOCKET_URL=${NEXT_PUBLIC_SOCKET_URL:-http://localhost:4000}
     ports:
       - "3000:3000"

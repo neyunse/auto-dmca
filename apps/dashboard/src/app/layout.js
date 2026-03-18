@@ -3,6 +3,8 @@ import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import { SocketProvider } from "@/components/SocketProvider";
 import { ToastProvider } from "@/components/ToastProvider";
+import { AuthProvider } from "@/components/AuthProvider";
+import ClientLayout from "@/components/ClientLayout";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
@@ -24,13 +26,11 @@ export default function RootLayout({ children }) {
 
         <SocketProvider>
           <ToastProvider>
-            <div className="flex min-h-screen relative z-10">
-              <Sidebar />
-              <main className="flex-1 ml-72 p-12 max-w-[1600px] mx-auto w-full relative">
-                 <div className="absolute top-0 right-0 p-8 opacity-5 font-mono text-[10px] tracking-[0.5em] pointer-events-none">DMCA // CORE_MODULE_v2.4</div>
-                 {children}
-              </main>
-            </div>
+            <AuthProvider>
+              <ClientLayout>
+                {children}
+              </ClientLayout>
+            </AuthProvider>
           </ToastProvider>
         </SocketProvider>
       </body>
